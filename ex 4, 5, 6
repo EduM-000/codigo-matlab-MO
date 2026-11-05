@@ -1,0 +1,201 @@
+"""
+Nome:        tpc1_lambert_q4_q6.py
+Versao:      1.0
+Autores:     <nomes do grupo>
+Data inicio: <data>
+Descricao:   Resolve as perguntas 4, 5 e 6 do problema de Lambert (TPC-1, MO 2026/27)
+             usando lamberthub.izzo2015 (algoritmo de Izzo 2015, CMDA 121(1):1-15).
+Algoritmos:  Izzo (2015) via lamberthub; solucao Kepleriana (equacao de Kepler resolvida
+             por Newton-Raphson proprio, E0 = min(M+e, pi) para M em [0,pi]).
+Validade:    0 <= e < 1, orbitas elipticas; testado com chi em [0,1].
+Inputs:      CHI (abaixo), tolerancias do solver.
+Outputs:     tabelas no terminal e figura 'q5_orbitas.png'.
+Dependencias: numpy, matplotlib, lamberthub
+Ambiente:    Python 3.x, lamberthub 1.0.0
+Alteracoes:  (registar aqui versao/data/descricao de cada alteracao)
+"""
+import numpy as np
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+from lamberthub import izzo2015
+ 
+# ----------------------------- PARAMETROS ---------------------------------
+CHI = 0.5            # <<< SUBSTITUIR pelo chi do grupo (ex.: 0.914)
+MU = 3.986e5         # km^3/s^2
+ATOL, RTOL, MAXITER = 1e-12, 1e-12, 100   # tolerancias do solver (ver Q3a)
+ 
+aA = 7600 + 3000 * CHI
+eA = 0.10 + 0.20 * CHI
+th1 = np.radians(30.0)
+th2 = np.radians(60.0 + 20.0 * CHI)
+rpA = aA * (1 - eA)
+eB = 0.80 + 0.15 * CHI
+aB = rpA / (1 - eB)          # (12): mesma periapside, rp = aB(1-eB)
+ 
+ 
+# ----------------------------- KEPLER -------------------------------------
+def kepler_newton(e, M, tol=1e-14, nmax=100):
+    M = np.mod(M, 2 * np.pi)
+    E = M if M > np.pi else (min(M + e, np.pi) if M <= np.pi else M)
+    for _ in range(nmax):
+        f = E - e * np.sin(E) - M
+        dE = f / (1 - e * np.cos(E))
+        E -= dE
+        if abs(dE) < tol and abs(E - e * np.sin(E) - M) < tol:
+            break
+    return E
+ 
+ 
+def theta_to_M(theta, e):
+    E = 2 * np.arctan2(np.sqrt(1 - e) * np.sin(theta / 2), np.sqrt(1 + e) * np.cos(theta / 2))
+    return np.mod(E - e * np.sin(E), 2 * np.pi)
+ 
+ 
+def state_at(a, e, theta):
+    p = a * (1 - e**2)
+    r = p / (1 + e * np.cos(theta))
+    rv = r * np.array([np.cos(theta), np.sin(theta), 0.0])
+    vv = np.sqrt(MU / p) * np.array([-np.sin(theta), e + np.cos(theta), 0.0])
+    return rv, vv
+ 
+ 
+def tof_kepler(a, e, t1, t2):
+    n = np.sqrt(MU / a**3)
+    dM = np.mod(theta_to_M(t2, e) - theta_to_M(t1, e), 2 * np.pi)
+    return dM / n
+ 
+ 
+def elements(r, v):
+    """a, e, true anomaly (rad) a partir de (r, v), plano xy, periapside em +x esperado."""
+    rn, v2 = np.linalg.norm(r), v @ v
+    a = 1 / (2 / rn - v2 / MU)
+    h = np.cross(r, v)
+    evec = np.cross(v, h) / MU - r / rn
+    e = np.linalg.norm(evec)
+    if e < 1e-12:
+        return a, e, np.nan, evec
+    nu = np.arctan2(np.cross(evec, r) @ h / np.linalg.norm(h), evec @ r)
+    return a, e, np.mod(nu, 2 * np.pi), evec
+ 
+ 
+def lambert(r1, r2, tof, M=0, prograde=True, low_path=True):
+    return izzo2015(MU, r1, r2, tof, M=M, prograde=prograde, low_path=low_path,
+                    maxiter=MAXITER, atol=ATOL, rtol=RTOL)
+ 
+ 
+def fmt(v):
+    return np.array2string(np.asarray(v), precision=9, suppress_small=False)
+ 
+ 
+# ----------------------------- Q4 -----------------------------------------
+def caso(a, e, nome):
+    r1, v1 = state_at(a, e, th1)
+    r2, v2 = state_at(a, e, th2)
+    dt = tof_kepler(a, e, th1, th2)
+    v1L, v2L = lambert(r1, r2, dt, M=0, prograde=True)
+    aL, eL, nu1L, evec = elements(r1, v1L)
+    _, _, nu2L, _ = elements(r2, v2L)
+    print(f"\n=== {nome}: a={a:.9f} km, e={e:.9f} ===")
+    print("r1 =", fmt(r1), " r2 =", fmt(r2))
+    print("v1 =", fmt(v1), " v2 =", fmt(v2), " dt = %.9f s" % dt)
+    print("v1L=", fmt(v1L), " v2L=", fmt(v2L))
+    res = dict(
+        dv1=np.linalg.norm(v1L - v1), dv2=np.linalg.norm(v2L - v2),
+        da=abs(aL - a), de=abs(eL - e),
+        dnu1=abs(nu1L - th1), dnu2=abs(nu2L - th2))
+    for k, x in res.items():
+        print(f"  erro {k:5s} = {x:.3e}")
+    return res
+ 
+ 
+print("##### Q4 (a)-(c) #####")
+resA = caso(aA, eA, "Orbita A")
+resB = caso(aB, eB, "Orbita B")
+print("\nRazao de erros B/A:")
+for k in resA:
+    print(f"  {k:5s}: {resB[k] / resA[k] if resA[k] > 0 else np.inf:.3g}")
+print("""
+(c) lamberthub.izzo2015: algoritmo de Izzo valido para elipses, parabolas e hiperboles,
+    qualquer M. Casos com e elevado e theta pequeno estao dentro do dominio; a precisao
+    degrada-se perto de transferencias de 180 graus e de tof muito proximo do minimo
+    em multi-revolucao. Confirmar na documentacao/paper do solver e citar.""")
+ 
+# ----------------------------- Q5 -----------------------------------------
+print("\n##### Q5 #####")
+R1 = np.array([7000.0, 0, 0])
+R2 = np.array([0, 8000.0, 0])
+DT = 10000.0
+sols = {}
+fig, ax = plt.subplots(figsize=(7, 7))
+th = np.linspace(0, 2 * np.pi, 400)
+ax.plot(6378 * np.cos(th), 6378 * np.sin(th), "k-", lw=0.8, label="Terra")
+ax.plot(*R1[:2], "ko"); ax.plot(*R2[:2], "ks")
+colors = {}
+cmap = plt.get_cmap("tab10")
+i = 0
+for M in (1, 0):
+    for prograde in (True, False):
+        for low in (True, False):
+            if M == 0 and not low:
+                continue   # em M=0 o ramo nao tem significado
+            tag = f"M={M} {'direto' if prograde else 'retrogrado'}" + \
+                  (f" {'low-path' if low else 'high-path'}" if M > 0 else "")
+            try:
+                v1, v2 = lambert(R1, R2, DT, M=M, prograde=prograde, low_path=low)
+            except Exception as ex:
+                print(f"{tag}: SEM SOLUCAO ({type(ex).__name__}: {ex})")
+                continue
+            a, e, nu1, evec = elements(R1, v1)
+            print(f"{tag}:\n  v1={fmt(v1)} km/s\n  v2={fmt(v2)} km/s\n  a={a:.6f} km  e={e:.8f}")
+            sols[tag] = (v1, v2, a, e)
+            if M == 1:
+                # orbita completa: propagar via anomalia verdadeira
+                h = np.cross(R1, v1); sgn = np.sign(h[2])
+                p = a * (1 - e**2)
+                w = np.arctan2(evec[1], evec[0])
+                nus = np.linspace(0, 2 * np.pi, 500)
+                rr = p / (1 + e * np.cos(nus))
+                x = rr * np.cos(w + sgn * nus); y = rr * np.sin(w + sgn * nus)
+                ax.plot(x, y, color=cmap(i), label=tag)
+                i += 1
+ax.set_aspect("equal"); ax.grid(alpha=.3); ax.legend(fontsize=7)
+ax.set_xlabel("x [km]"); ax.set_ylabel("y [km]")
+plt.savefig("q5_orbitas.png", dpi=150)
+print("Figura guardada em q5_orbitas.png")
+print("""
+(c) M=0: 1 solucao por sentido (a transferencia directa e' < 180 deg e a retrograda > 180 deg).
+    Para M=1 existem 2 ramos por sentido porque tof=10000 s excede o tempo minimo de voo
+    para 1 revolucao (a funcao T(x) tem um minimo e cada tof acima dele corta a curva duas vezes);
+    para M=0, T(x) e' monotona, logo so ha' uma raiz.""")
+ 
+# ----------------------------- Q6 -----------------------------------------
+print("\n##### Q6 #####")
+raA = aA * (1 + eA)
+TA = 2 * np.pi * np.sqrt(aA**3 / MU)
+r1 = np.array([rpA, 0, 0]); r2 = np.array([raA, 0, 0])
+print("r1 x r2 =", np.cross(r1, r2), "(nulo -> plano orbital indefinido)")
+try:
+    v1, v2 = lambert(r1, r2, TA / 2, M=0)
+    print("(a) solver devolveu:", fmt(v1), fmt(v2))
+except Exception as ex:
+    print(f"(a) solver falhou: {type(ex).__name__}: {ex}")
+ 
+th2b = np.pi - 1e-3
+r1b, v1b = state_at(aA, eA, 0.0)
+r2b, v2b = state_at(aA, eA, th2b)
+dtb = tof_kepler(aA, eA, 0.0, th2b)
+try:
+    v1L, v2L = lambert(r1b, r2b, dtb, M=0)
+    print("(b) r2 =", fmt(r2b), " dt = %.9f s" % dtb)
+    print("    erro |v1L-v1| = %.3e  |v2L-v2| = %.3e" %
+          (np.linalg.norm(v1L - v1b), np.linalg.norm(v2L - v2b)))
+    a_, e_, nu_, _ = elements(r1b, v1L)
+    print("    erro a = %.3e  erro e = %.3e" % (abs(a_ - aA), abs(e_ - eA)))
+except Exception as ex:
+    print(f"(b) solver falhou: {type(ex).__name__}: {ex}")
+print("""
+Comentario: com r1 x r2 = 0 o plano nao e' definido (infinitos planos, qualquer um serve
+fisicamente; o solver tem divisao por |r1 x r2| ou escolhe o plano arbitrariamente).
+Com theta2 = pi - 1e-3 o plano e' definido mas mal condicionado: espera-se erro muito maior
+que no caso regular, e que dependa da tolerancia.""")
