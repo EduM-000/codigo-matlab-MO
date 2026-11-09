@@ -38,6 +38,8 @@ fprintf('Orbita A: a = %.10g km, e = %.10g, th1 = %.10g deg, th2 = %.10g deg\n',
         aA, eA, th1*180/pi, th2*180/pi);
 
 % 2(a) solucao Kepleriana
+%Calcula as posições (r1, r2), velocidades (v1, v2) e tempo de voo (dtA) teóricos e exatos
+% a partir das equações clássicas para servir de referencial aos testes seguintes.
 [r1, v1] = orbit_state(aA, eA, th1, mu);
 [r2, v2] = orbit_state(aA, eA, th2, mu);
 dtA = tof_kepler(aA, eA, th1, th2, mu);
@@ -46,12 +48,17 @@ fprintf(' v1 = [%.12f %.12f %.1f] km/s\n v2 = [%.12f %.12f %.1f] km/s\n', v1, v2
 fprintf(' dt = %.10f s\n', dtA);
 
 % 2(b) Lambert, M = 0, directo
+% Utiliza apenas as posições (r1, r2) e o tempo de voo (dtA) para adivinhar as velocidades,
+% avaliando depois o erro absoluto e relativo face às velocidades teóricas (v1, v2).
 [v1L, v2L, flag] = lambert_dir(r1, r2, dtA, 0, +1, +1, mu);
 fprintf('\n2(b) exitflag = %d\n v1L = [%.12f %.12f %.1f] km/s\n v2L = [%.12f %.12f %.1f] km/s\n', flag, v1L, v2L);
 fprintf(' |v1L - v1| = %.3e km/s (relativo %.3e)\n', norm(v1L - v1), norm(v1L - v1)/norm(v1));
 fprintf(' |v2L - v2| = %.3e km/s (relativo %.3e)\n', norm(v2L - v2), norm(v2L - v2)/norm(v2));
 
 % 2(c) elementos a partir de (r1, v1L) e (r2, v2L)
+% Converte os vetores de estado gerados pelo Lambert de volta para semi-eixo maior (a) 
+% e excentricidade (e). O objetivo é provar que a órbita encontrada pelo solver é, 
+% efetivamente, a Órbita A.
 [aL, eL, t1L] = rv2elem(r1, v1L, mu);
 [aL2, eL2, t2L] = rv2elem(r2, v2L, mu);
 fprintf('\n2(c) a = %.10f km (erro %.3e km)\n     e = %.12f (erro %.3e)\n', aL, aL - aA, eL, eL - eA);
@@ -60,6 +67,8 @@ fprintf('     th1 = %.10f deg (erro %.3e deg)\n     th2 = %.10f deg (erro %.3e d
 fprintf('     (a, e a partir de r2, v2L: %.10f km, %.12f)\n', aL2, eL2);
 
 % 2(d) verificacao pelas formulas da corda (com a = aA, imposto)
+% Confirma a transferência através do teorema clássico usando comprimentos das cordas (c),
+% semi-perímetros (s) e a equação do tempo de Lagrange, analisando os resíduos (rt).
 [v1c, v2c, al, be, rt] = lambert_chord(r1, r2, dtA, aA, 0, mu);
 c = norm(r2 - r1); s = (norm(r1) + norm(r2) + c)/2;
 fprintf('\n2(d) c = %.10f km, s = %.10f km, alpha = %.12f rad, beta = %.12f rad\n', c, s, al, be);
@@ -71,6 +80,9 @@ fprintf('     (com a = aL do solver: |v1c-v1L| = %.3e, |v2c-v2L| = %.3e km/s)\n'
         norm(v1c2 - v1L), norm(v2c2 - v2L));
 
 % 2(e) problema inverso no tempo: r2 -> r1, mesmo dt
+% Pede ao solver para viajar do destino (r2) de volta à origem (r1) gastando o mesmo tempo (dtA).
+% Testa as duas direções de viagem ao redor do corpo atrator: o trajeto curto (retrógrado)
+% e o trajeto longo (direto).
 [w1r, w2r, fr] = lambert_dir(r2, r1, dtA, 0, -1, +1, mu);   % retrogrado
 [w1d, w2d, fd] = lambert_dir(r2, r1, dtA, 0, +1, +1, mu);   % directo (long way)
 fprintf('\n2(e) retrogrado: flag %d, v1 = [%.12f %.12f %.1f], v2 = [%.12f %.12f %.1f]\n', fr, w1r, w2r);
@@ -80,6 +92,10 @@ fprintf('     directo:    flag %d, v1 = [%.12f %.12f %.1f], v2 = [%.12f %.12f %.
 fprintf('                 a = %.6f km, e = %.8f\n', ad, ed);
 
 %% ------------------------------------------------------------ Pergunta 3
+% Estudo de Convergência do Algoritmo
+% Executa o solver sucessivamente restringindo a tolerância de erro pretendida (de 1e-2 até 1e-16).
+% O objetivo é observar o "trade-off" entre o aumento do número de iterações necessárias 
+% e a aproximação assimptótica da velocidade ao valor exato.
 fprintf('\n3(b) Orbita A, tolerancia de Izzo variavel (lambert_tol.m)\n');
 fprintf('%8s %11s %11s %11s %11s %5s  %s\n', 'tol', 'err v1', 'err v2', 'err a', 'err e', 'iter', 'algoritmo');
 tols = [1e-2 1e-4 1e-6 1e-8 1e-10 1e-12 1e-14 1e-15 1e-16];
@@ -91,15 +107,23 @@ for tol = tols
 end
 
 %% ------------------------------------------------------------ Pergunta 4
+% Comparação de Robustez com uma Órbita Altamente Excêntrica (Órbita B)
+% Cria-se uma Órbita B partilhando o mesmo perigeu da Órbita A, mas com excentricidade bem superior.
 rpA = aA*(1 - eA);
 eB = 0.80 + 0.15*chi;   aB = rpA/(1 - eB);
 fprintf('\n4    rpA = %.10f km; Orbita B: a = %.10f km, e = %.10g\n', rpA, aB, eB);
+
+% Cálculo dos estados Keplerianos de B
 [R1, V1] = orbit_state(aB, eB, th1, mu);
 [R2, V2] = orbit_state(aB, eB, th2, mu);
 dtB = tof_kepler(aB, eB, th1, th2, mu);
 fprintf('4(a) r1 = [%.10f %.10f 0] km, r2 = [%.10f %.10f 0] km\n', R1(1:2), R2(1:2));
 fprintf('     v1 = [%.12f %.12f 0] km/s, v2 = [%.12f %.12f 0] km/s\n', V1(1:2), V2(1:2));
 fprintf('     dt = %.10f s\n', dtB);
+
+% Teste do solver nesta nova geometria e comparação de desempenho
+% A métrica principal aqui é verificar se uma excentricidade elevada degenera a precisão ou
+% obriga o algoritmo de Izzo a executar consideravelmente mais iterações.
 [V1L, V2L, flB] = lambert_dir(R1, R2, dtB, 0, +1, +1, mu);
 [aBL, eBL] = rv2elem(R1, V1L, mu);
 fprintf('4(b) flag %d, v1L = [%.12f %.12f], v2L = [%.12f %.12f] km/s\n', flB, V1L(1:2), V2L(1:2));
@@ -112,7 +136,13 @@ fprintf('     (orbita A: err a rel = %.3e, err e = %.3e)\n', (aL - aA)/aA, eL - 
 fprintf('     iteracoes de Izzo: orbita A %d, orbita B %d\n', infA.iter, infB.iter);
 
 %% ------------------------------------------------------------ Pergunta 5
+
+% Transferências com múltiplas revoluções e visualização
 P1 = [7000; 0; 0]; P2 = [0; 8000; 0]; dt5 = 10000;
+
+% 5(a,b) Procura por todas as soluções físicas para M = 1 (1 revolução completa + fração da segunda)
+% Devido à geometria, para M>0, existem 4 soluções possíveis para o mesmo tempo de voo: 
+% 2 trajetórias diretas e 2 retrógradas (cada uma com um ramo de "energia alta" e "energia baixa").
 fprintf('\n5(a,b) M = 1\n');
 nomeS = {'directo', 'retrogrado'}; sent = [+1 -1]; ramos = [+1 -1];
 sol = struct('v1',{},'v2',{},'a',{},'e',{},'lab',{});
@@ -128,6 +158,8 @@ for i = 1:2
         sol(end+1) = struct('v1', q1, 'v2', q2, 'a', a5, 'e', e5, 'lab', lab); %#ok<SAGROW>
     end
 end
+
+% 5(c) Verifica as soluções básicas de zero revoluções (M=0) para o mesmo par P1/P2
 fprintf('\n5(c) M = 0\n');
 for i = 1:2
     for j = 1:2
@@ -137,7 +169,10 @@ for i = 1:2
             nomeS{i}, ramos(j), fl, q1(1:2), q2(1:2), a5, e5);
     end
 end
-% tempo minimo para M = 1 (minimo de t(x) na eq. de Lagrange) em cada sentido
+
+% Cálculo do Tempo Mínimo Teórico de voo
+% Serve para validar matematicamente se dt = 10000s é fisicamente possível para as 
+% órbitas de múltipla revolução. Usa a equação de Lagrange em função de um parâmetro de passo genérico 'x'.
 for i = 1:2
     c5 = norm(P2 - P1); s5 = (norm(P1) + norm(P2) + c5)/2; am = s5/2;
     dth = mod(sent(i)*atan2(P1(1)*P2(2) - P1(2)*P2(1), dot(P1, P2)), 2*pi);
@@ -148,7 +183,9 @@ for i = 1:2
     fprintf(' %s: tempo minimo para M = 1: T_min = %.2f s (em x = %.4f)\n', nomeS{i}, tmin, xs(k));
 end
 
-% figura das quatro orbitas M = 1
+% Geração de Gráfico
+% Desenha a Terra, as coordenadas iniciais/finais e interpola as 4 soluções elípticas de M=1 
+% para apreciação visual das diferenças nos perigeus e excentricidades.
 figure; hold on; grid on;
 tt = linspace(0, 2*pi, 400);
 fill(Re*cos(tt), Re*sin(tt), [0.85 0.85 0.85], 'EdgeColor', [0.4 0.4 0.4]);   % Terra
@@ -171,6 +208,13 @@ xlabel('x [km]'); ylabel('y [km]');
 title('Pergunta 5: as quatro solucoes com M = 1 (dt = 10000 s)');
 
 %% ------------------------------------------------------------ Pergunta 6
+% Teste de Singularidades do Algoritmo de Lambert
+% Ocorre quando a transferência é de exatamente 180 graus. Nesses casos, o plano orbital é ambíguo
+% pois os vetores posição de partida e chegada formam uma reta. O produto vetorial anula-se.
+
+% 6(a) A Singularidade Exata
+% Define a partida (Q1) no perigeu e a chegada (Q2) no apogeu (180º exatos) e tenta
+% forçar o solver a falhar ou recorrer à convenção que tiver implementada interna.
 raA = aA*(1 + eA); TA = 2*pi*sqrt(aA^3/mu);
 Q1 = [rpA; 0; 0]; Q2 = [-raA; 0; 0];
 fprintf('\n6(a) rp = %.10f km, ra = %.10f km, TA/2 = %.10f s\n', rpA, raA, TA/2);
@@ -180,6 +224,10 @@ fprintf('     solver: flag %d, v1 = [%g %g %g], v2 = [%g %g %g]\n', fz, z1, z2);
 [~, vp] = orbit_state(aA, eA, 0, mu); [~, va] = orbit_state(aA, eA, pi, mu);
 fprintf('     (orbita A: |vp| = %.10f km/s, |va| = %.10f km/s)\n', norm(vp), norm(va));
 
+% 6(b) Teste de Sensibilidade "Perto" da Singularidade
+% Testa uma transferência com ângulo de 180 graus menos uma microfração radiana (1e-3 rad).
+% Permite verificar a estabilidade do cálculo de vetores (normas muito curtas) pela capacidade de Izzo 
+% em não divergir os resultados numéricos finais mesmo estando à beira da divisão-por-zero matemática.
 th2b = pi - 1e-3;
 [S1, U1] = orbit_state(aA, eA, 0, mu);
 [S2, U2] = orbit_state(aA, eA, th2b, mu);
