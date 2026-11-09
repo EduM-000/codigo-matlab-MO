@@ -1,8 +1,10 @@
 """
 Nome:        tpc1_lambert_q4_q6.py
 Versao:      1.0
-Autores:     <nomes do grupo>
-Data inicio: <data>
+Autores:     João Caires, nº113627
+             Afonso Cardoso, nº113555
+             Eduardo Monteiro, nº114191
+Data inicio: 05/11/2026
 Descricao:   Resolve as perguntas 4, 5 e 6 do problema de Lambert (TPC-1, MO 2026/27)
              usando lamberthub.izzo2015 (algoritmo de Izzo 2015, CMDA 121(1):1-15).
 Algoritmos:  Izzo (2015) via lamberthub; solucao Kepleriana (equacao de Kepler resolvida
@@ -12,7 +14,6 @@ Inputs:      CHI (abaixo), tolerancias do solver.
 Outputs:     tabelas no terminal e figura 'q5_orbitas.png'.
 Dependencias: numpy, matplotlib, lamberthub
 Ambiente:    Python 3.x, lamberthub 1.0.0
-Alteracoes:  (registar aqui versao/data/descricao de cada alteracao)
 """
 import numpy as np
 import matplotlib
