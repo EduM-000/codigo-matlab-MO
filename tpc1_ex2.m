@@ -2,7 +2,9 @@
 %
 %  Nome:        tpc1_ex2
 %  Versao:      1.0
-%  Autores:     [nomes dos elementos do grupo]
+%  Autores:     João Caires, nº113627
+%               Afonso Cardoso, nº113555
+%               Eduardo Monteiro, nº114191
 %  Data da 1.a versao: 2026-11-08
 %  Descricao:   Script que executa todos os testes do Problema 2 com o
 %                  Lambert solver lambert.m de R. Oldenhuis (MATLAB Central
