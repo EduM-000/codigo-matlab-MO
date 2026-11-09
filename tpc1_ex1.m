@@ -29,7 +29,6 @@
 %     MATLAB R2024b / R2025a
 %  Lista de alterações efectuadas e respectivas datas:
 %     - 05/Nov/2026 (v1.0): Versão inicial desenvolvida para o TPC-1.
-%     [Espaço reservado para registo de futuras alterações após a entrega]
 % =========================================================================
 
 
