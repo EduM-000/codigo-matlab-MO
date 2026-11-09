@@ -1,3 +1,5 @@
+function [E, n_iter, convergiu, E_seq, r] = kepler_nr(e, M, E0, tol, Nmax)
+
 
 %  Nome: kepler_nr.m
 %  Número da versão actual: 1.0
@@ -53,7 +55,6 @@
 %     - 05/Nov/2026 (v1.0): Versão inicial desenvolvida para o TPC-1.
 %     [Espaço reservado para registo de futuras alterações após a entrega]
 
-function [E, n_iter, convergiu, E_seq, r] = kepler_nr(e, M, E0, tol, Nmax)
 
 % Validação elementar dos parâmetros de entrada
 if e < 0 || e >= 1
