@@ -1,7 +1,7 @@
 
 %  Nome: kepler_nr.m
 %  Número da versão actual: 1.0
-%  Número do grupo: 42
+%  Número do grupo: 44
 %  Nomes dos autores: João Caires, nº113627
 %                     Afonso Cardoso, nº113555
 %                     Eduardo Monteiro, nº114191
