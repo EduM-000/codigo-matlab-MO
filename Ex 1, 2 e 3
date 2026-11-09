@@ -1,9 +1,12 @@
 O programa abaixo utiliza a formulação sugerida no enunciado — Rody Oldenhuis (2020) [17] / Dario Izzo (2015) [13] (documentando também a equivalência direta com McElreath et al. (2025) [15, 16]). Inclui a sub-rotina lambert_solver_local com controlo explícito da tolerância (tol) e do número máximo de iterações (Nmax) para executar os testes da secção 3.   Matlab% =========================================================================
 % (a) Nome: teste_lambert_sec1a3.m
 % (b) Número da versão actual: 1.0
-% (c) Nomes dos autores: [Inserir Nomes e Números de Aluno do Grupo]
-% (d) Data da primeira versão: 05/Nov/2026
-% (e) Breve descrição:
+% (c) Número do grupo: 42
+% (d) Nomes dos autores: João Caires, nº 113627
+%                        Afonso Cardoso, nº113555
+%                        Eduardo Monteiro, nº114191
+% (e) Data da primeira versão: 05/Nov/2026
+% (f) Breve descrição:
 %     Script de teste e validação do problema de Lambert correspondente às
 %     secções 2.2.1, 2.2.2 e 2.2.3 do TPC-1 de Mecânica Orbital (x = 0.635):
 %     1. Determina analiticamente os vectores r1, r2, v1, v2 e o tempo de
@@ -15,7 +18,7 @@ O programa abaixo utiliza a formulação sugerida no enunciado — Rody Oldenhui
 %        versores i_r1, i_r2, i_c e cot(alpha/2), cot(beta/2).
 %     5. Resolve o problema inverso no tempo (de r2 para r1 em Delta_t).
 %     6. Avalia a precisão numérica do solver para diferentes tolerâncias.
-% (f) Lista de algoritmos utilizados e referências:
+% (g) Lista de algoritmos utilizados e referências:
 %     - Relações Keplerianas e equação de Lambert (corda e cotangentes):
 %       [1] P. J. S. Gil, "Elementos de Mecânica Orbital", IST, 2015
 %           (vs. 1.5.1, 2025-09-08).
@@ -28,24 +31,24 @@ O programa abaixo utiliza a formulação sugerida no enunciado — Rody Oldenhui
 %       Exposição dos argumentos de tolerância (tol) e número máximo de
 %       iterações (Nmax) na sub-rotina lambert_solver_local para permitir
 %       o estudo de convergência da pergunta 3.(b).
-% (g) Intervalos de validade esperados e efectivamente testados:
+% (h) Intervalos de validade esperados e efectivamente testados:
 %     - Esperados: Delta_t > 0, órbitas não degeneradas (r1 x r2 ~= 0),
 %       0 < Delta_theta < 2*pi, M >= 0.
 %     - Efectivamente testados: a_A = 9505 km, e_A = 0.227, theta_1 = 30 deg,
 %       theta_2 = 72.7 deg, Delta_t = 781.57961630 s, M = 0,
 %       tol em [1e-4, 1e-15].
-% (h) Lista de inputs:
+% (i) Lista de inputs:
 %     Parâmetro adimensional x = 0.635 e mu_Terra = 3.986e5 km^3/s^2.
-% (i) Lista de outputs:
+% (j) Lista de outputs:
 %     Impressão formatada na consola de r1, r2, v1, v2, Delta_t, v1_L, v2_L,
 %     elementos orbitais reconstruídos, velocidades pela fórmula das
 %     cotangentes, solução inversa no tempo e tabela de erros vs. tol.
-% (j) Lista de dependências:
+% (k) Lista de dependências:
 %     Ficheiro autónomo (inclui as funções locais lambert_solver_local,
 %     tof_izzo e rv2oe_planar).
-% (k) Versão do software / ambiente de desenvolvimento e teste:
+% (l) Versão do software / ambiente de desenvolvimento e teste:
 %     MATLAB R2024b / R2025a
-% (l) Lista de alterações efectuadas e respectivas datas:
+% (m) Lista de alterações efectuadas e respectivas datas:
 %     - 05/Nov/2026 (v1.0): Versão inicial desenvolvida para o TPC-1.
 %     [Espaço reservado para registo de alterações futuras]
 % =========================================================================
