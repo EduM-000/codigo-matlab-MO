@@ -1,28 +1,28 @@
 %% TPC1_EX2  Mecanica Orbital 2026/27 - TPC-1, Problema 2 (Problema de Lambert)
 %
-% (a) Nome:        tpc1_ex2
-% (b) Versao:      1.0
-% (c) Autores:     [nomes dos elementos do grupo]
-% (d) Data da 1.a versao: 2026-11-08
-% (e) Descricao:   Script que executa todos os testes do Problema 2 com o
+%  Nome:        tpc1_ex2
+%  Versao:      1.0
+%  Autores:     [nomes dos elementos do grupo]
+%  Data da 1.a versao: 2026-11-08
+%  Descricao:   Script que executa todos os testes do Problema 2 com o
 %                  Lambert solver lambert.m de R. Oldenhuis (MATLAB Central
 %                  File Exchange #26348, v1.4; ref. [17] do enunciado).
-% (f) Algoritmos:  Lambert: Izzo (secante em x, com fallback para Lancaster-
+%  Algoritmos:  Lambert: Izzo (secante em x, com fallback para Lancaster-
 %                  Blanchard com melhorias de Gooding), via lambert.m [17];
 %                  lambert_tol.m = copia de lambert.m com tolerancia e n.o
 %                  maximo de iteracoes de Izzo como entradas (pergunta 3).
 %                  Orbita conhecida: equacao da orbita + equacao de Kepler
 %                  (EMO). Verificacao: formulas da corda com cot(alpha/2) e
 %                  cot(beta/2) (EMO; Battin 1999).
-% (g) Validade:    orbitas elipticas; testado com chi = 0.635, e em
+%  Validade:    orbitas elipticas; testado com chi = 0.635, e em
 %                  [0.227, 0.89525], M = 0 e 1, transferencias 42.7 a 270 graus
 %                  e quase 180 graus.
-% (h) Inputs:      chi, mu (parametros do enunciado).
-% (i) Outputs:     tabelas na consola; figura das 4 orbitas (pergunta 5).
-% (j) Dependencias: lambert.m, lambert_tol.m, lambert_dir.m, lambert_chord.m,
+%  Inputs:      chi, mu (parametros do enunciado).
+%  Outputs:     tabelas na consola; figura das 4 orbitas (pergunta 5).
+%  Dependencias: lambert.m, lambert_tol.m, lambert_dir.m, lambert_chord.m,
 %                  orbit_state.m, tof_kepler.m, rv2elem.m (mesma pasta).
-% (k) Ambiente:    MATLAB R2024b; testado tambem em GNU Octave 8.4.
-% (l) Historico de alteracoes: v1.0 2026-11-08 versao entregue.
+%  Ambiente:    MATLAB R2024b; testado tambem em GNU Octave 8.4.
+%  Historico de alteracoes: v1.0 2026-11-08 versao entregue.
 
 clear; clc; format long g;
 chi = 0.635;            % chi do grupo (exato)
