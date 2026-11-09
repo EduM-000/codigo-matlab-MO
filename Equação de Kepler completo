@@ -1,20 +1,20 @@
 
 
 % =========================================================================
-% (a) Nome: kepler_nr.m
-% (b) Número da versão actual: 1.0
-% (c) Número do grupo: 42
-% (d) Nomes dos autores: João Caires, nº113627
+%  Nome: kepler_nr.m
+%  Número da versão actual: 1.0
+%  Número do grupo: 42
+%  Nomes dos autores: João Caires, nº113627
 %                        Afonso Cardoso, nº113555
-%                        Eduardo Monteiro, nº11
-% (e) Data da primeira versão: 05/Nov/2026
-% (f) Breve descrição:
+%                        Eduardo Monteiro, nº114191
+%  Data da primeira versão: 05/Nov/2026
+%  Breve descrição:
 %     Resolve a equação de Kepler elíptica, f(E) = E - e*sin(E) - M = 0,
 %     recorrendo ao método iterativo de Newton-Raphson, devolvendo a
 %     aproximação final da anomalia excêntrica E, o número de iterações
 %     realizadas, um indicador lógico de convergência, o histórico completo
 %     das aproximações sucessivas (E_0, E_1, ..., E_k) e o resíduo final.
-% (g) Lista de algoritmos utilizados e referências:
+%  Lista de algoritmos utilizados e referências:
 %     - Método de Newton-Raphson aplicado à equação de Kepler elíptica,
 %       conforme formulado em:
 %       [1] P. J. S. Gil, "Elementos de Mecânica Orbital", IST, 2015
@@ -28,30 +28,30 @@
 %          (|1 - e*cos(E_k)| < tol_deriv) e contra valores NaN/Inf.
 %       3. Preservação do tipo numérico de E0 (double ou single) para
 %          permitir testes em precisão simples (alínea 3.c).
-% (h) Intervalos de validade esperados e efectivamente testados:
+%  Intervalos de validade esperados e efectivamente testados:
 %     - Intervalos de validade esperados: 0 <= e < 1 (órbitas elípticas e
 %       circulares), M em R (rad), E0 em R (rad), tol > 0, Nmax >= 1.
 %     - Intervalos efectivamente testados: e em [0.5, 0.995715],
 %       M em [0.001635, 3.0] rad, E0 em [0, 2.24] rad,
 %       tol em [1e-12, 1e-6], Nmax em [20, 100].
-% (i) Lista de inputs:
+%  Lista de inputs:
 %     - e    : Excentricidade orbital (adimensional, 0 <= e < 1)
 %     - M    : Anomalia média (rad)
 %     - E0   : Estimativa inicial da anomalia excêntrica (rad)
 %     - tol  : Tolerância numérica de paragem, epsilon (rad)
 %     - Nmax : Número máximo de iterações permitido (inteiro positivo)
-% (j) Lista de outputs:
+%  Lista de outputs:
 %     - E         : Aproximação final da anomalia excêntrica E_k (rad)
 %     - n_iter    : Número de iterações efectivamente realizadas
 %     - convergiu : Indicador booleano (true = convergiu; false = falha)
 %     - E_seq     : Vector linha [E_0, E_1, ..., E_k] com a sequência (rad)
 %     - r         : Resíduo final r = |E - e*sin(E) - M| (rad)
-% (k) Lista de dependências:
+%  Lista de dependências:
 %     Nenhuma dependência externa (usa apenas funções elementares nativas
 %     do MATLAB: sin, cos, abs, eps, isnan, isinf).
-% (l) Versão do software / ambiente de desenvolvimento e teste:
+%  Versão do software / ambiente de desenvolvimento e teste:
 %     MATLAB R2024b / R2025a
-% (m) Lista de alterações efectuadas e respectivas datas:
+%  Lista de alterações efectuadas e respectivas datas:
 %     - 05/Nov/2026 (v1.0): Versão inicial desenvolvida para o TPC-1.
 %     [Espaço reservado para registo de futuras alterações após a entrega]
 % =========================================================================
@@ -139,35 +139,35 @@ end
 
 % =========================================================================
 % 2. Script de Teste Completo (teste_pergunta1.m)
-% (a) Nome: teste_pergunta1.m
-% (b) Número da versão actual: 1.0
-% (c) Número do grupo: 42
-% (d) Nomes dos autores: João Caires, nº113627
+%  Nome: teste_pergunta1.m
+%  Número da versão actual: 1.0
+%  Número do grupo: 42
+%  Nomes dos autores: João Caires, nº113627
 %                        Afonso Cardoso, nº113555
 %                        Eduardo Monteiro, nº114191
-% (e) Data da primeira versão: 05/Nov/2026
-% (f) Breve descrição:
+%  Data da primeira versão: 05/Nov/2026
+%  Breve descrição:
 %     Programa de teste que executa todos os casos numéricos pedidos na
 %     Pergunta 1 (Equação de Kepler) do TPC-1 para x = 0.635 (alíneas 2.a,
 %     2.b, 3.b, 3.c, 3.f, 3.g e 3.h) e imprime as tabelas de resultados.
-% (g) Lista de algoritmos utilizados e referências:
+%  Lista de algoritmos utilizados e referências:
 %     - Método de Newton-Raphson implementado em kepler_nr.m [1].
 %     - Estimativa inicial segura E_0 = min(M + e, pi) (eq. 7 do enunciado).
 %     - Estimativa inicial de Danby E_0 = M + 0.85*e [3, 4].
-% (h) Intervalos de validade esperados e efectivamente testados:
+%  Intervalos de validade esperados e efectivamente testados:
 %     - Testado para x = 0.635: Caso A (e_A = 0.5175, M_A = 0.5675*pi rad),
 %       Caso B (e_B = 0.995715, M_B = 0.001635 rad) e Caso 3.c (e = 0.5,
 %       M = 3.0 rad, E0 = 0 em precisão simples).
-% (i) Lista de inputs:
+%  Lista de inputs:
 %     Parâmetro de grupo x = 0.635 definido internamente no script.
-% (j) Lista de outputs:
+%  Lista de outputs:
 %     Tabelas formatadas na consola com E, n_iter, estado de convergência,
 %     sequências de iteradas E_k e resíduos |f(E_k)|.
-% (k) Lista de dependências:
+%  Lista de dependências:
 %     Requer a função kepler_nr.m no mesmo directório.
-% (l) Versão do software / ambiente de desenvolvimento e teste:
+%  Versão do software / ambiente de desenvolvimento e teste:
 %     MATLAB R2024b / R2025a
-% (m) Lista de alterações efectuadas e respectivas datas:
+%  Lista de alterações efectuadas e respectivas datas:
 %     - 05/Nov/2026 (v1.0): Versão inicial desenvolvida para o TPC-1.
 %     [Espaço reservado para registo de futuras alterações após a entrega]
 % =========================================================================
